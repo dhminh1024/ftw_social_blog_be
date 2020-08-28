@@ -2,10 +2,10 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const reactionSchema = Schema({
-  user: { type: mongoose.Schema.ObjectId, required: true, ref: "User" },
+  user: { type: Schema.ObjectId, required: true, ref: "User" },
   targetType: { type: String, required: true, enum: ["Blog", "Review"] },
   target: {
-    type: mongoose.Schema.ObjectId,
+    type: Schema.ObjectId,
     required: true,
     refPath: "targetType",
   },
@@ -55,6 +55,7 @@ reactionSchema.statics.calculateReaction = async function (
       },
     },
   ]);
+  // console.log(stats);
   await mongoose.model(targetType).findByIdAndUpdate(targetId, {
     reactions: {
       laugh: (stats[0] && stats[0].laugh) || 0,
@@ -87,4 +88,6 @@ reactionSchema.post(/^findOneAnd/, async function (next) {
   );
 });
 
-module.exports = mongoose.model("Reaction", reactionSchema);
+const Reaction = mongoose.model("Reaction", reactionSchema);
+module.exports = Reaction;
+// module.exports = mongoose.model("Reaction", reactionSchema);

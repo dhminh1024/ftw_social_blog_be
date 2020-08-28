@@ -1,5 +1,7 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
+const jwt = require("jsonwebtoken");
+const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
 
 const userSchema = Schema({
   name: { type: String, required: true },
@@ -10,6 +12,13 @@ const userSchema = Schema({
 });
 
 userSchema.plugin(require("./plugins/isDeletedFalse"));
+
+userSchema.methods.generateToken = async function () {
+  const accessToken = await jwt.sign({ _id: this._id }, JWT_SECRET_KEY, {
+    expiresIn: "1d",
+  });
+  return accessToken;
+};
 // userSchema.pre(/^find/, function (next) {
 //   if (this._conditions["isDeleted"] === undefined)
 //     this._conditions["isDeleted"] = false;
@@ -24,4 +33,5 @@ userSchema.plugin(require("./plugins/isDeletedFalse"));
 //   .virtual("lastname")
 //   .get(() => this.name.substr(this.name.indexOf(" ") + 1));
 
-module.exports = mongoose.model("User", userSchema);
+const User = mongoose.model("User", userSchema);
+module.exports = User;

@@ -15,8 +15,6 @@ tags: CoderSchool, FTW, Project
   ```bash
   mkdir social-blog-api
   cd social-blog-api
-  mkdir server
-  cd server
   npx express-generator --no-view
   npm install
   git init
@@ -30,6 +28,7 @@ tags: CoderSchool, FTW, Project
   ```bash
   npm i dotenv cors
   npm i mongoose
+  npm i jsonwebtoken bcryptjs express-validator
   ```
 - Remove everything in `public/`
 - Create `\.env`:
@@ -81,13 +80,12 @@ tags: CoderSchool, FTW, Project
   
   // This function controls the way we response to the client
   // If we need to change the way to response later on, we only need to handle it here
-  utilsHelper.sendResponse = (res, status, success, data, error, message, token) => {
+  utilsHelper.sendResponse = (res, status, success, data, errors, message) => {
     const response = {};
     if (success) response.success = success;
     if (data) response.data = data;
-    if (error) response.error = {message: error.message};
+    if (errors) response.errors = errors;
     if (message) response.message = message;
-    if (token) response.token = token;
     return res.status(status).json(response);
   };
 
@@ -149,12 +147,15 @@ tags: CoderSchool, FTW, Project
 
   /* Initialize Error Handling */
   app.use((err, req, res, next) => {
-    if (err.statusCode === 404) {
-      return utilsHelper.sendResponse(res, 404, false, null, err, null, null);
-    } else {
-      console.log("ERROR", err.message);
-      return utilsHelper.sendResponse(res, 500, false, null, err, null, null);
-    }
+    console.log("ERROR", err.message);
+    return utilsHelper.sendResponse(
+      res,
+      err.statusCode ? err.statusCode : 500,
+      false,
+      null,
+      [{ message: err.message }],
+      null
+    );
   });
 
   module.exports = app;
@@ -656,3 +657,6 @@ module.exports = mongoose.model("Reaction", reactionSchema);
   });
   ```
 
+### Setup Routes and Controllers
+
+#### 

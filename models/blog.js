@@ -22,4 +22,5 @@ const blogSchema = Schema({
 
 blogSchema.plugin(require("./plugins/isDeletedFalse"));
 
-module.exports = mongoose.model("Blog", blogSchema);
+const Blog = mongoose.model("Blog", blogSchema);
+module.exports = Blog;

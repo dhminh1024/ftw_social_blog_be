@@ -4,8 +4,8 @@ const Blog = require("./blog");
 
 const reviewSchema = Schema({
   content: { type: String, required: true },
-  user: { type: mongoose.Schema.ObjectId, required: true, ref: "User" },
-  blog: { type: mongoose.Schema.ObjectId, required: true, ref: "Blog" },
+  user: { type: Schema.ObjectId, required: true, ref: "User" },
+  blog: { type: Schema.ObjectId, required: true, ref: "Blog" },
   reactions: {
     laugh: { type: Number, default: 0 },
     sad: { type: Number, default: 0 },
@@ -39,4 +39,5 @@ reviewSchema.post(/^findOneAnd/, async function (next) {
   await this.doc.constructor.calculateReviews(this.doc.blog);
 });
 
-module.exports = mongoose.model("Review", reviewSchema);
+const Review = mongoose.model("Review", reviewSchema);
+module.exports = Review;
