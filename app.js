@@ -4,6 +4,8 @@ var cookieParser = require("cookie-parser");
 var logger = require("morgan");
 const utilsHelper = require("./helpers/utils.helper");
 const mongoose = require("mongoose");
+mongoose.plugin(require("./models/plugins/modifiedAt"));
+
 const mongoURI = process.env.MONGODB_URI;
 const cors = require("cors");
 
@@ -17,7 +19,6 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
 /* DB Connections */
-mongoose.plugin(require("./models/plugins/modifiedAt"));
 mongoose
   .connect(mongoURI, {
     // some options to deal with deprecated warning

@@ -11,7 +11,7 @@ const { body, param } = require("express-validator");
  * @access Login required
  */
 router.post(
-  "/",
+  "/add/:id",
   authMiddleware.loginRequired,
   validators.validate([
     param("id").exists().isString().custom(validators.checkObjectId),
@@ -25,7 +25,7 @@ router.post(
  * @access Login required
  */
 router.delete(
-  "/",
+  "/add/:id",
   authMiddleware.loginRequired,
   validators.validate([
     param("id").exists().isString().custom(validators.checkObjectId),
@@ -39,7 +39,7 @@ router.delete(
  * @access Login required
  */
 router.post(
-  "/",
+  "/manage/:id",
   authMiddleware.loginRequired,
   validators.validate([
     param("id").exists().isString().custom(validators.checkObjectId),
@@ -52,8 +52,8 @@ router.post(
  * @description Decline a friend request from an user
  * @access Login required
  */
-router.post(
-  "/",
+router.delete(
+  "/manage/:id",
   authMiddleware.loginRequired,
   validators.validate([
     param("id").exists().isString().custom(validators.checkObjectId),
@@ -66,8 +66,8 @@ router.post(
  * @description Remove a friend
  * @access Login required
  */
-router.post(
-  "/",
+router.delete(
+  "/:id",
   authMiddleware.loginRequired,
   validators.validate([
     param("id").exists().isString().custom(validators.checkObjectId),
