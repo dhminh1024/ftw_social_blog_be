@@ -30,8 +30,37 @@ router.delete(
   validators.validate([
     param("id").exists().isString().custom(validators.checkObjectId),
   ]),
-  userController.acceptFriendRequest
+  userController.cancelFriendRequest
 );
+
+/**
+ * @route GET api/friends/add
+ * @description Get the list of friend requests that are sent by the user
+ * @access Login required
+ */
+router.get(
+  "/add",
+  authMiddleware.loginRequired,
+  userController.getSentFriendRequestList
+);
+
+/**
+ * @route GET api/friends/manage
+ * @description Get the list of received friend requests
+ * @access Login required
+ */
+router.get(
+  "/manage",
+  authMiddleware.loginRequired,
+  userController.getReceivedFriendRequestList
+);
+
+/**
+ * @route GET api/friends
+ * @description Get the list of friends
+ * @access Login required
+ */
+router.get("/", authMiddleware.loginRequired, userController.getFriendList);
 
 /**
  * @route POST api/friends/manage/:id

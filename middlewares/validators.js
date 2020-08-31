@@ -1,5 +1,6 @@
 const utilsHelper = require("../helpers/utils.helper");
 const mongoose = require("mongoose");
+// install express-validator
 const { validationResult } = require("express-validator");
 const validators = {};
 
@@ -8,9 +9,11 @@ validators.validate = (validationArray) => async (req, res, next) => {
   const errors = validationResult(req);
   if (errors.isEmpty()) return next();
 
+  console.log(errors);
   const extractedErrors = [];
-  console.log(errors.array());
-  errors.array().map((err) => extractedErrors.push({ [err.param]: err.msg }));
+  errors
+    .array()
+    .map((error) => extractedErrors.push({ [error.param]: error.msg }));
   return utilsHelper.sendResponse(
     res,
     422,
@@ -29,16 +32,3 @@ validators.checkObjectId = (paramId) => {
 };
 
 module.exports = validators;
-
-// validators.checkObjectId = (paramId) => (req, res, next) => {
-//   if (!mongoose.Types.ObjectId.isValid(req.params[paramId]))
-//     return utilsHelper.sendResponse(
-//       res,
-//       400,
-//       false,
-//       null,
-//       [{ id: "Invalid ObjectId" }],
-//       "Validation Error"
-//     );
-//   next();
-// };

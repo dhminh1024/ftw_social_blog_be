@@ -3,11 +3,14 @@ var path = require("path");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
 const utilsHelper = require("./helpers/utils.helper");
+const cors = require("cors");
+require("dotenv").config();
 const mongoose = require("mongoose");
 mongoose.plugin(require("./models/plugins/modifiedAt"));
-
 const mongoURI = process.env.MONGODB_URI;
-const cors = require("cors");
+
+const multer = require("multer");
+const upload = multer();
 
 var indexRouter = require("./routes/index");
 
@@ -16,9 +19,11 @@ var app = express();
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(upload.array());
 app.use(cookieParser());
 
 /* DB Connections */
+
 mongoose
   .connect(mongoURI, {
     // some options to deal with deprecated warning
@@ -54,8 +59,8 @@ app.use((err, req, res, next) => {
     err.statusCode ? err.statusCode : 500,
     false,
     null,
-    [{ message: err.message }],
-    null
+    { message: err.message },
+    err.message
   );
 });
 

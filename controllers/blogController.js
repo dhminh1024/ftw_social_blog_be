@@ -1,31 +1,7 @@
 const utilsHelper = require("../helpers/utils.helper");
 const Blog = require("../models/blog");
+const Review = require("../models/review");
 const blogController = {};
-
-blogController.createNewBlog = async (req, res, next) => {
-  try {
-    const userId = req.userId;
-    console.log(userId);
-    const { title, content } = req.body;
-
-    const blog = await Blog.create({
-      title: title,
-      content: content,
-      author: userId,
-    });
-
-    return utilsHelper.sendResponse(
-      res,
-      200,
-      true,
-      { blog },
-      null,
-      "Create new blog successful"
-    );
-  } catch (error) {
-    next(error);
-  }
-};
 
 blogController.getBlogs = async (req, res, next) => {
   try {
@@ -39,7 +15,8 @@ blogController.getBlogs = async (req, res, next) => {
     const blogs = await Blog.find()
       .sort({ createdAt: -1 })
       .skip(offset)
-      .limit(limit);
+      .limit(limit)
+      .populate("author");
 
     return utilsHelper.sendResponse(
       res,
@@ -47,7 +24,7 @@ blogController.getBlogs = async (req, res, next) => {
       true,
       { blogs, totalPages },
       null,
-      null
+      ""
     );
   } catch (error) {
     next(error);
@@ -56,11 +33,35 @@ blogController.getBlogs = async (req, res, next) => {
 
 blogController.getSingleBlog = async (req, res, next) => {
   try {
-    console.log(req.params.id);
-    const blog = await Blog.findById(req.params.id);
-    console.log(blog);
+    let blog = await Blog.findById(req.params.id).populate("author");
     if (!blog) return next(new Error("Blog not found"));
+    blog = blog.toJSON();
+    blog.reviews = await Review.find({ blog: blog._id }).populate("user");
     return utilsHelper.sendResponse(res, 200, true, blog, null, null);
+  } catch (error) {
+    next(error);
+  }
+};
+
+blogController.createNewBlog = async (req, res, next) => {
+  try {
+    const author = req.userId;
+    const { title, content } = req.body;
+
+    const blog = await Blog.create({
+      title,
+      content,
+      author,
+    });
+
+    return utilsHelper.sendResponse(
+      res,
+      200,
+      true,
+      blog,
+      null,
+      "Create new blog successful"
+    );
   } catch (error) {
     next(error);
   }
@@ -68,15 +69,24 @@ blogController.getSingleBlog = async (req, res, next) => {
 
 blogController.updateSingleBlog = async (req, res, next) => {
   try {
+    const author = req.userId;
+    const blogId = req.params.id;
     const { title, content } = req.body;
+
     const blog = await Blog.findOneAndUpdate(
-      { _id: req.params.id, author: req.userId },
-      { title: title, content: content },
+      { _id: blogId, author: author },
+      { title, content },
       { new: true }
     );
     if (!blog) return next(new Error("Blog not found or User not authorized"));
-
-    return utilsHelper.sendResponse(res, 200, true, blog, null, null);
+    return utilsHelper.sendResponse(
+      res,
+      200,
+      true,
+      blog,
+      null,
+      "Update successful"
+    );
   } catch (error) {
     next(error);
   }
@@ -84,13 +94,23 @@ blogController.updateSingleBlog = async (req, res, next) => {
 
 blogController.deleteSingleBlog = async (req, res, next) => {
   try {
+    const author = req.userId;
+    const blogId = req.params.id;
+
     const blog = await Blog.findOneAndUpdate(
-      { _id: req.params.id, author: req.userId },
+      { _id: blogId, author: author },
       { isDeleted: true },
       { new: true }
     );
     if (!blog) return next(new Error("Blog not found or User not authorized"));
-    return utilsHelper.sendResponse(res, 204, true, null, null, null);
+    return utilsHelper.sendResponse(
+      res,
+      200,
+      true,
+      null,
+      null,
+      "Delete successful"
+    );
   } catch (error) {
     next(error);
   }

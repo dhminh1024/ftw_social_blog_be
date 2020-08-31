@@ -1,7 +1,7 @@
 const utilsHelper = require("../helpers/utils.helper");
-const bcrypt = require("bcryptjs");
 const User = require("../models/user");
 const Friendship = require("../models/friendship");
+const bcrypt = require("bcryptjs");
 const userController = {};
 
 userController.register = async (req, res, next) => {
@@ -17,15 +17,14 @@ userController.register = async (req, res, next) => {
       email,
       password,
     });
-    const accessToken = user.generateToken();
-
+    const accessToken = await user.generateToken();
     return utilsHelper.sendResponse(
       res,
       200,
       true,
       { user, accessToken },
       null,
-      "Register successful"
+      "Create user successful"
     );
   } catch (error) {
     next(error);
@@ -108,7 +107,7 @@ userController.acceptFriendRequest = async (req, res, next) => {
       to: userId,
       status: "requesting",
     });
-    if (!friendship) return next(new Error("Request not found"));
+    if (!friendship) return next(new Error("Friend Request not found"));
 
     friendship.status = "accepted";
     await friendship.save();
@@ -146,6 +145,57 @@ userController.declineFriendRequest = async (req, res, next) => {
       null,
       "Friend request has been declined"
     );
+  } catch (error) {
+    next(error);
+  }
+};
+
+userController.getSentFriendRequestList = async (req, res, next) => {
+  try {
+    const userId = req.userId;
+    const requestList = await Friendship.find({
+      from: userId,
+      status: "requesting",
+    }).populate("to");
+    return utilsHelper.sendResponse(res, 200, true, requestList, null, null);
+  } catch (error) {
+    next(error);
+  }
+};
+
+userController.getReceivedFriendRequestList = async (req, res, next) => {
+  try {
+    const userId = req.userId;
+    const requestList = await Friendship.find({
+      to: userId,
+      status: "requesting",
+    }).populate("from");
+    return utilsHelper.sendResponse(res, 200, true, requestList, null, null);
+  } catch (error) {
+    next(error);
+  }
+};
+
+userController.getFriendList = async (req, res, next) => {
+  try {
+    const userId = req.userId;
+    let friendList = await Friendship.find({
+      $or: [{ from: userId }, { to: userId }],
+      status: "accepted",
+    })
+      .populate("from")
+      .populate("to");
+    friendList = friendList.map((friendship) => {
+      const friend = {};
+      friend.acceptedAt = friendship.updatedAt;
+      if (friendship.from._id.equals(userId)) {
+        friend.user = friendship.to;
+      } else {
+        friend.user = friendship.from;
+      }
+      return friend;
+    });
+    return utilsHelper.sendResponse(res, 200, true, friendList, null, null);
   } catch (error) {
     next(error);
   }

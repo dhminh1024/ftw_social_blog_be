@@ -1,18 +1,16 @@
 const utilsHelper = require("../helpers/utils.helper");
-const bcrypt = require("bcryptjs");
 const User = require("../models/user");
-
+const bcrypt = require("bcryptjs");
 const authController = {};
 
 authController.loginWithEmail = async (req, res, next) => {
   try {
     const { email, password } = req.body;
-    console.log({ email, password });
-    const user = await User.findOne({ email });
-    if (!user) return next(new Error("Invalid Credentials"));
+    const user = await User.findOne({ email }, "+password");
+    if (!user) return next(new Error("Invalid credentials"));
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return next(new Error("Wrong Password"));
+    if (!isMatch) return next(new Error("Wrong password"));
 
     accessToken = await user.generateToken();
     return utilsHelper.sendResponse(

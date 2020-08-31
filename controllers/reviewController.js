@@ -1,6 +1,6 @@
 const utilsHelper = require("../helpers/utils.helper");
-const reviewController = {};
 const Review = require("../models/review");
+const reviewController = {};
 
 reviewController.createNewReview = async (req, res, next) => {
   try {
@@ -8,18 +8,19 @@ reviewController.createNewReview = async (req, res, next) => {
     const blogId = req.params.id;
     const { content } = req.body;
 
-    const review = await Review.create({
+    let review = await Review.create({
       user: userId,
       blog: blogId,
       content,
     });
+    review = await review.populate("user").execPopulate();
     return utilsHelper.sendResponse(
       res,
       200,
       true,
-      { review },
+      review,
       null,
-      "Create Review successful"
+      "Create new review successful"
     );
   } catch (error) {
     next(error);
@@ -29,7 +30,6 @@ reviewController.createNewReview = async (req, res, next) => {
 reviewController.getReviewsOfBlog = async (req, res, next) => {
   try {
     const blogId = req.params.id;
-
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
 
@@ -48,7 +48,7 @@ reviewController.getReviewsOfBlog = async (req, res, next) => {
       true,
       { reviews, totalPages },
       null,
-      null
+      ""
     );
   } catch (error) {
     next(error);
@@ -68,8 +68,14 @@ reviewController.updateSingleReview = async (req, res, next) => {
     );
     if (!review)
       return next(new Error("Review not found or User not authorized"));
-
-    return utilsHelper.sendResponse(res, 200, true, review, null, null);
+    return utilsHelper.sendResponse(
+      res,
+      200,
+      true,
+      review,
+      null,
+      "Update successful"
+    );
   } catch (error) {
     next(error);
   }
@@ -86,8 +92,14 @@ reviewController.deleteSingleReview = async (req, res, next) => {
     });
     if (!review)
       return next(new Error("Review not found or User not authorized"));
-
-    return utilsHelper.sendResponse(res, 204, true, null, null, null);
+    return utilsHelper.sendResponse(
+      res,
+      200,
+      true,
+      null,
+      null,
+      "Delete successful"
+    );
   } catch (error) {
     next(error);
   }

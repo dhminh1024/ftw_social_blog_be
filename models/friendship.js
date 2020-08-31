@@ -1,7 +1,6 @@
 const mongoose = require("mongoose");
-const Schema = mongoose.Schema;
-
 const User = require("./user");
+const Schema = mongoose.Schema;
 
 const friendshipSchema = Schema({
   from: { type: Schema.ObjectId, required: true, ref: "User" },
@@ -16,7 +15,7 @@ friendshipSchema.statics.calculateFriendCount = async function (userId) {
   const friendCount = await this.find({
     $or: [{ from: userId }, { to: userId }],
     status: "accepted",
-  }).count();
+  }).countDocuments();
   await User.findByIdAndUpdate(userId, { friendCount: friendCount });
 };
 
@@ -35,5 +34,4 @@ friendshipSchema.post(/^findOneAnd/, async function (next) {
   await this.doc.constructor.calculateFriendCount(this.doc.to);
 });
 
-const Friendship = mongoose.model("Friendship", friendshipSchema);
-module.exports = Friendship;
+module.exports = mongoose.model("Friendship", friendshipSchema);

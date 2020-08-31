@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
-const Schema = mongoose.Schema;
 const Blog = require("./blog");
+const Schema = mongoose.Schema;
 
 const reviewSchema = Schema({
   content: { type: String, required: true },
@@ -15,14 +15,12 @@ const reviewSchema = Schema({
   },
 });
 
-// Calculate Review Count and update in Blog
 reviewSchema.statics.calculateReviews = async function (blogId) {
-  const reviewCount = await this.find({ blog: blogId }).count();
+  const reviewCount = await this.find({ blog: blogId }).countDocuments();
   await Blog.findByIdAndUpdate(blogId, { reviewCount: reviewCount });
 };
 
 reviewSchema.post("save", function () {
-  // this point to current review
   this.constructor.calculateReviews(this.blog);
 });
 
