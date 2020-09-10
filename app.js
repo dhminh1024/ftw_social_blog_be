@@ -9,12 +9,17 @@ const mongoose = require("mongoose");
 // mongoose.plugin(require("./models/plugins/modifiedAt"));
 const mongoURI = process.env.MONGODB_URI;
 
+const passport = require("passport");
+require("./helpers/passport");
+
 const multer = require("multer");
 const upload = multer();
 
 var indexRouter = require("./routes/index");
 
 var app = express();
+
+app.use(passport.initialize());
 
 app.use(logger("dev"));
 app.use(express.json());
