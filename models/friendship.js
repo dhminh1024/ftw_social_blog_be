@@ -1,15 +1,18 @@
 const mongoose = require("mongoose");
-const User = require("./user");
+const User = require("./User");
 const Schema = mongoose.Schema;
 
-const friendshipSchema = Schema({
-  from: { type: Schema.ObjectId, required: true, ref: "User" },
-  to: { type: Schema.ObjectId, required: true, ref: "User" },
-  status: {
-    type: String,
-    enum: ["requesting", "accepted", "decline", "removed", "cancel"],
+const friendshipSchema = Schema(
+  {
+    from: { type: Schema.ObjectId, required: true, ref: "User" },
+    to: { type: Schema.ObjectId, required: true, ref: "User" },
+    status: {
+      type: String,
+      enum: ["requesting", "accepted", "decline", "removed", "cancel"],
+    },
   },
-});
+  { timestamps: true }
+);
 
 friendshipSchema.statics.calculateFriendCount = async function (userId) {
   const friendCount = await this.find({
@@ -34,4 +37,5 @@ friendshipSchema.post(/^findOneAnd/, async function (next) {
   await this.doc.constructor.calculateFriendCount(this.doc.to);
 });
 
-module.exports = mongoose.model("Friendship", friendshipSchema);
+const Friendship = mongoose.model("Friendship", friendshipSchema);
+module.exports = Friendship;

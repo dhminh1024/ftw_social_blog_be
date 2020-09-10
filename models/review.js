@@ -1,27 +1,30 @@
 const mongoose = require("mongoose");
-const Blog = require("./blog");
+const Blog = require("./Blog");
 const Schema = mongoose.Schema;
 
-const reviewSchema = Schema({
-  content: { type: String, required: true },
-  user: { type: Schema.ObjectId, required: true, ref: "User" },
-  blog: { type: Schema.ObjectId, required: true, ref: "Blog" },
-  reactions: {
-    laugh: { type: Number, default: 0 },
-    sad: { type: Number, default: 0 },
-    like: { type: Number, default: 0 },
-    love: { type: Number, default: 0 },
-    angry: { type: Number, default: 0 },
+const reviewSchema = Schema(
+  {
+    content: { type: String, required: true },
+    user: { type: Schema.ObjectId, required: true, ref: "User" },
+    blog: { type: Schema.ObjectId, required: true, ref: "Blog" },
+    reactions: {
+      laugh: { type: Number, default: 0 },
+      sad: { type: Number, default: 0 },
+      like: { type: Number, default: 0 },
+      love: { type: Number, default: 0 },
+      angry: { type: Number, default: 0 },
+    },
   },
-});
+  { timestamps: true }
+);
 
 reviewSchema.statics.calculateReviews = async function (blogId) {
   const reviewCount = await this.find({ blog: blogId }).countDocuments();
   await Blog.findByIdAndUpdate(blogId, { reviewCount: reviewCount });
 };
 
-reviewSchema.post("save", function () {
-  this.constructor.calculateReviews(this.blog);
+reviewSchema.post("save", async function () {
+  await this.constructor.calculateReviews(this.blog);
 });
 
 // Neither findByIdAndUpdate norfindByIdAndDelete have access to document middleware.

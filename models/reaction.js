@@ -1,20 +1,23 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-const reactionSchema = Schema({
-  user: { type: Schema.ObjectId, required: true, ref: "User" },
-  targetType: { type: String, required: true, enum: ["Blog", "Review"] },
-  target: {
-    type: Schema.ObjectId,
-    required: true,
-    refPath: "targetType",
+const reactionSchema = Schema(
+  {
+    user: { type: Schema.ObjectId, required: true, ref: "User" },
+    targetType: { type: String, required: true, enum: ["Blog", "Review"] },
+    target: {
+      type: Schema.ObjectId,
+      required: true,
+      refPath: "targetType",
+    },
+    emoji: {
+      type: String,
+      required: true,
+      enum: ["laugh", "sad", "like", "love", "angry"],
+    },
   },
-  emoji: {
-    type: String,
-    required: true,
-    enum: ["laugh", "sad", "like", "love", "angry"],
-  },
-});
+  { timestamps: true }
+);
 
 reactionSchema.statics.calculateReaction = async function (
   targetId,
@@ -66,9 +69,9 @@ reactionSchema.statics.calculateReaction = async function (
   });
 };
 
-reactionSchema.post("save", function () {
+reactionSchema.post("save", async function () {
   // this point to current review
-  this.constructor.calculateReaction(this.target, this.targetType);
+  await this.constructor.calculateReaction(this.target, this.targetType);
 });
 
 reactionSchema.pre(/^findOneAnd/, async function (next) {
@@ -83,4 +86,5 @@ reactionSchema.post(/^findOneAnd/, async function (next) {
   );
 });
 
-module.exports = mongoose.model("Reaction", reactionSchema);
+const Reaction = mongoose.model("Reaction", reactionSchema);
+module.exports = Reaction;

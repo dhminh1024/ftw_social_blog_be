@@ -27,7 +27,7 @@ tags: CoderSchool, FTW, Project
 - Install dependencies:
   ```bash
   npm i dotenv cors
-  npm i mongoose
+  npm i mongoose multer mkdirp
   npm i jsonwebtoken bcryptjs express-validator
   ```
 - Remove everything in `public/`

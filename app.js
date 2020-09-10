@@ -6,7 +6,7 @@ const utilsHelper = require("./helpers/utils.helper");
 const cors = require("cors");
 require("dotenv").config();
 const mongoose = require("mongoose");
-mongoose.plugin(require("./models/plugins/modifiedAt"));
+// mongoose.plugin(require("./models/plugins/modifiedAt"));
 const mongoURI = process.env.MONGODB_URI;
 
 const multer = require("multer");
@@ -19,7 +19,7 @@ var app = express();
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(upload.array());
+// app.use(upload.array());
 app.use(cookieParser());
 
 /* DB Connections */
@@ -54,14 +54,25 @@ app.use((req, res, next) => {
 /* Initialize Error Handling */
 app.use((err, req, res, next) => {
   console.log("ERROR", err);
-  return utilsHelper.sendResponse(
-    res,
-    err.statusCode ? err.statusCode : 500,
-    false,
-    null,
-    { message: err.message },
-    err.message
-  );
+  if (err.isOperational) {
+    return utilsHelper.sendResponse(
+      res,
+      err.statusCode ? err.statusCode : 500,
+      false,
+      null,
+      { message: err.message },
+      err.errorType
+    );
+  } else {
+    return utilsHelper.sendResponse(
+      res,
+      err.statusCode ? err.statusCode : 500,
+      false,
+      null,
+      { message: err.message },
+      "Internal Server Error"
+    );
+  }
 });
 
 module.exports = app;

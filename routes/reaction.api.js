@@ -3,7 +3,7 @@ const router = express.Router();
 const authMiddleware = require("../middlewares/authentication");
 const validators = require("../middlewares/validators");
 const { body } = require("express-validator");
-const reactionController = require("../controllers/reactionController");
+const reactionController = require("../controllers/reaction.controller");
 
 /**
  * @route POST api/reactions

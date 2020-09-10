@@ -1,8 +1,10 @@
 const express = require("express");
 const router = express.Router();
-const blogController = require("../controllers/blogController");
+const blogController = require("../controllers/blog.controller");
 const validators = require("../middlewares/validators");
 const authMiddleware = require("../middlewares/authentication");
+const fileUpload = require("../helpers/upload.helper")("public/images/");
+const uploader = fileUpload.uploader;
 const { body, param } = require("express-validator");
 
 /**
@@ -33,10 +35,11 @@ router.get(
 router.post(
   "/",
   authMiddleware.loginRequired,
-  // validators.validate([
-  //   body("title", "Missing title").exists().notEmpty(),
-  //   body("content", "Missing content").exists().notEmpty(),
-  // ]),
+  // uploader.array("images", 2),
+  validators.validate([
+    body("title", "Missing title").exists().notEmpty(),
+    body("content", "Missing content").exists().notEmpty(),
+  ]),
   blogController.createNewBlog
 );
 

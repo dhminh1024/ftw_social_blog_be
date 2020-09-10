@@ -1,10 +1,11 @@
 const mongoose = require("mongoose");
-const User = require("../models/user");
-const Blog = require("../models/blog");
-const Review = require("../models/review");
-const Reaction = require("../models/reaction");
-const Friendship = require("../models/friendship");
+const User = require("../models/User");
+const Blog = require("../models/Blog");
+const Review = require("../models/Review");
+const Reaction = require("../models/Reaction");
+const Friendship = require("../models/Friendship");
 const faker = require("faker");
+const bcrypt = require("bcryptjs");
 
 /**
  * Returns a random integer between min (inclusive) and max (inclusive).
@@ -44,10 +45,13 @@ const generateData = async () => {
     const userNum = 10;
     const otherNum = 3; // num of blog each user, reviews or reactions each blog
     for (let i = 0; i < userNum; i++) {
+      const salt = await bcrypt.genSalt(10);
+      const password = await bcrypt.hash("123", salt);
       await User.create({
         name: faker.name.findName(),
-        email: faker.internet.email(),
-        password: "123",
+        email: faker.internet.email().toLowerCase(),
+        avatarUrl: faker.image.avatar(),
+        password,
       }).then(function (user) {
         console.log("Created new user: " + user.name);
         users.push(user);
@@ -69,6 +73,10 @@ const generateData = async () => {
         await Blog.create({
           title: faker.lorem.sentence(),
           content: faker.lorem.paragraph(),
+          images: [
+            faker.image.imageUrl(400, 300),
+            faker.image.imageUrl(400, 300),
+          ],
           author: users[i]._id,
         }).then(async (blog) => {
           console.log("Created blog:" + blog.title);
@@ -126,4 +134,4 @@ const main = async (resetDB = false) => {
   getRandomBlogs(1);
 };
 
-main();
+main(true);
