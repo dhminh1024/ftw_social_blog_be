@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const GlobalMessage = require("../models/GlobalMessage");
 const Conversation = require("../models/Conversation");
-const Message = require("../models/message");
+const Message = require("../models/Message");
 const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
 
 const io = socket_io();
