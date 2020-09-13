@@ -21,6 +21,19 @@ router.post(
 );
 
 /**
+ * @route POST api/users/verify_email
+ * @description Verify email of a new user
+ * @access Public
+ */
+router.post(
+  "/verify_email",
+  validators.validate([
+    body("code", "Invalid Verification Code").exists().notEmpty(),
+  ]),
+  userController.verifyEmail
+);
+
+/**
  * @route PUT api/users/
  * @description Update user profile
  * @access Login required

@@ -16,6 +16,7 @@ const multer = require("multer");
 const upload = multer();
 
 var indexRouter = require("./routes/index");
+const { emailInternalHelper } = require("./helpers/email.helper");
 
 var app = express();
 
@@ -40,6 +41,7 @@ mongoose
   .then(() => {
     console.log(`Mongoose connected to ${mongoURI}`);
     // require("./testing/testSchema");
+    emailInternalHelper.createTemplatesIfNotExists();
   })
   .catch((err) => console.log(err));
 

@@ -52,6 +52,7 @@ const generateData = async () => {
         email: faker.internet.email().toLowerCase(),
         avatarUrl: faker.image.avatar(),
         password,
+        emailVerified: true,
       }).then(function (user) {
         console.log("Created new user: " + user.name);
         users.push(user);

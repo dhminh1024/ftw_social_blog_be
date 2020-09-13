@@ -9,6 +9,8 @@ const userSchema = Schema(
     email: { type: String, required: true, unique: true },
     avatarUrl: { type: String, require: false },
     password: { type: String, required: true, select: false },
+    emailVerificationCode: { type: String, select: false },
+    emailVerified: { type: Boolean, require: true, default: false },
     friendCount: { type: Number, default: 0 },
     isDeleted: { type: Boolean, default: false, select: false },
   },
