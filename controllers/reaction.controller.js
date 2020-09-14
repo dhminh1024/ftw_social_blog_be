@@ -10,7 +10,7 @@ const reactionController = {};
 reactionController.saveReaction = catchAsync(async (req, res, next) => {
   const { targetType, target, emoji } = req.body;
 
-  const targetObj = await mongoose.model(targetType).findById(targetId);
+  const targetObj = await mongoose.model(targetType).findById(target);
   if (!targetObj)
     return next(
       new AppError(404, `${targetType} not found`, "Create Reaction Error")

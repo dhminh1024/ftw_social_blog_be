@@ -37,23 +37,33 @@ authController.loginWithFacebookOrGoogle = catchAsync(
     profile.email = profile.email.toLowerCase();
     let user = await User.findOne({ email: profile.email });
     const randomPassword = "" + Math.floor(Math.random() * 10000000);
+    const salt = await bcrypt.genSalt(10);
+    const newPassword = await bcrypt.hash(randomPassword, salt);
 
     if (user) {
-      user = await User.findByIdAndUpdate(
-        user._id,
-        { avatarUrl: profile.avatarUrl },
-        { new: true }
-      );
+      if (!user.emailVerified) {
+        user = await User.findByIdAndUpdate(
+          user._id,
+          {
+            $set: { emailVerified: true, avatarUrl: profile.avatarUrl },
+            $unset: { emailVerificationCode: 1 },
+          },
+          { new: true }
+        );
+      } else {
+        user = await User.findByIdAndUpdate(
+          user._id,
+          { avatarUrl: profile.avatarUrl },
+          { new: true }
+        );
+      }
     } else {
-      const salt = await bcrypt.genSalt(10);
-      const newPassword = await bcrypt.hash(randomPassword, salt);
-      const newUser = await User.create({
+      user = await User.create({
         name: profile.name,
         email: profile.email,
         password: newPassword,
         avatarUrl: profile.avatarUrl,
       });
-      user = await newUser.save();
     }
 
     const accessToken = await user.generateToken();
