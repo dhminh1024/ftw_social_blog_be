@@ -44,14 +44,9 @@ userController.register = catchAsync(async (req, res, next) => {
     return next(new AppError(500, emailData.error, "Create Email Error"));
   }
 
-  return sendResponse(
-    res,
-    200,
-    true,
-    { user, accessToken },
-    null,
-    "Create user successful"
-  );
+  delete user.emailVerificationCode;
+  delete user.password;
+  return sendResponse(res, 200, true, { user }, null, "Create user successful");
 });
 
 userController.verifyEmail = catchAsync(async (req, res, next) => {
