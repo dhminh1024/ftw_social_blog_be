@@ -36,5 +36,13 @@ utilsHelper.generateRandomHexString = (len) => {
     .toUpperCase(); // return required number of characters
 };
 
+utilsHelper.filterFields = (obj, allows) => {
+  const result = {};
+  for (const field of allows) {
+    result[field] = field in obj ? obj[field] : "";
+  }
+  return result;
+};
+
 utilsHelper.AppError = AppError;
 module.exports = utilsHelper;

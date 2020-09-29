@@ -5,6 +5,7 @@ const {
 } = require("../helpers/utils.helper");
 const Blog = require("../models/Blog");
 const Review = require("../models/Review");
+const User = require("../models/User");
 const blogController = {};
 
 blogController.getBlogs = catchAsync(async (req, res, next) => {

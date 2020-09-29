@@ -32,20 +32,18 @@ userController.register = catchAsync(async (req, res, next) => {
   });
   const accessToken = await user.generateToken();
 
-  const verificationURL = `${FRONTEND_URL}/verify/${emailVerificationCode}`;
-  const emailData = await emailHelper.renderEmailTemplate(
-    "verify_email",
-    { name, code: verificationURL },
-    email
-  );
-  if (!emailData.error) {
-    emailHelper.send(emailData);
-  } else {
-    return next(new AppError(500, emailData.error, "Create Email Error"));
-  }
+  // const verificationURL = `${FRONTEND_URL}/verify/${emailVerificationCode}`;
+  // const emailData = await emailHelper.renderEmailTemplate(
+  //   "verify_email",
+  //   { name, code: verificationURL },
+  //   email
+  // );
+  // if (!emailData.error) {
+  //   emailHelper.send(emailData);
+  // } else {
+  //   return next(new AppError(500, emailData.error, "Create Email Error"));
+  // }
 
-  delete user.emailVerificationCode;
-  delete user.password;
   return sendResponse(res, 200, true, { user }, null, "Create user successful");
 });
 
@@ -148,6 +146,8 @@ userController.getUsers = catchAsync(async (req, res, next) => {
 userController.getCurrentUser = catchAsync(async (req, res, next) => {
   const userId = req.userId;
   const user = await User.findById(userId);
+  if (!user)
+    return next(new AppError(400, "User not found", "Get Current User Error"));
   return sendResponse(
     res,
     200,
@@ -161,6 +161,13 @@ userController.getCurrentUser = catchAsync(async (req, res, next) => {
 userController.sendFriendRequest = catchAsync(async (req, res, next) => {
   const userId = req.userId; // From
   const toUserId = req.params.id; // To
+
+  const user = await User.findById(toUserId);
+  if (!user) {
+    return next(
+      new AppError(400, "User not found", "Send Friend Request Error")
+    );
+  }
 
   let friendship = await Friendship.findOne({
     $or: [
@@ -178,9 +185,23 @@ userController.sendFriendRequest = catchAsync(async (req, res, next) => {
   } else {
     switch (friendship.status) {
       case "requesting":
-        return next(
-          new AppError(400, "The request has been sent", "Add Friend Error")
-        );
+        if (friendship.from.equals(userId)) {
+          return next(
+            new AppError(
+              400,
+              "You have already sent a request to this user",
+              "Add Friend Error"
+            )
+          );
+        } else {
+          return next(
+            new AppError(
+              400,
+              "You have received a request from this user",
+              "Add Friend Error"
+            )
+          );
+        }
         break;
       case "accepted":
         return next(
@@ -190,6 +211,8 @@ userController.sendFriendRequest = catchAsync(async (req, res, next) => {
       case "removed":
       case "decline":
       case "cancel":
+        friendship.from = userId;
+        friendship.to = toUserId;
         friendship.status = "requesting";
         await friendship.save();
         return sendResponse(res, 200, true, null, null, "Request has ben sent");
@@ -485,7 +508,7 @@ userController.getConversationList = catchAsync(async (req, res, next) => {
       delete temp.users;
       temp.to = toUser[0];
       temp.type = "CONVERSATION_TYPE.PRIVATE";
-      console.log(temp);
+      // console.log(temp);
       return temp;
     }
     return false;

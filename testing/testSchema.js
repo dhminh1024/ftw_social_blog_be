@@ -105,7 +105,7 @@ const generateData = async () => {
               content: faker.lorem.sentence(),
               user: users[getRandomInt(0, userNum - 1)]._id,
               targetType: "Blog",
-              target: blog._id,
+              targetId: blog._id,
               emoji: emojis[getRandomInt(0, 4)],
             });
           }

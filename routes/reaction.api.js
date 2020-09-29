@@ -15,7 +15,9 @@ router.post(
   authMiddleware.loginRequired,
   validators.validate([
     body("targetType", "Invalid targetType").exists().isIn(["Blog", "Review"]),
-    body("target", "Invalid target").exists().custom(validators.checkObjectId),
+    body("targetId", "Invalid targetId")
+      .exists()
+      .custom(validators.checkObjectId),
     body("emoji", "Invalid emoji")
       .exists()
       .isIn(["laugh", "sad", "like", "love", "angry"]),

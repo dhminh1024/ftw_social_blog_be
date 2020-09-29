@@ -5,7 +5,7 @@ const reactionSchema = Schema(
   {
     user: { type: Schema.ObjectId, required: true, ref: "User" },
     targetType: { type: String, required: true, enum: ["Blog", "Review"] },
-    target: {
+    targetId: {
       type: Schema.ObjectId,
       required: true,
       refPath: "targetType",
@@ -25,11 +25,11 @@ reactionSchema.statics.calculateReaction = async function (
 ) {
   const stats = await this.aggregate([
     {
-      $match: { target: targetId },
+      $match: { targetId },
     },
     {
       $group: {
-        _id: "$target",
+        _id: "$targetId",
         laugh: {
           $sum: {
             $cond: [{ $eq: ["$emoji", "laugh"] }, 1, 0],
@@ -71,7 +71,7 @@ reactionSchema.statics.calculateReaction = async function (
 
 reactionSchema.post("save", async function () {
   // this point to current review
-  await this.constructor.calculateReaction(this.target, this.targetType);
+  await this.constructor.calculateReaction(this.targetId, this.targetType);
 });
 
 reactionSchema.pre(/^findOneAnd/, async function (next) {
@@ -81,7 +81,7 @@ reactionSchema.pre(/^findOneAnd/, async function (next) {
 
 reactionSchema.post(/^findOneAnd/, async function (next) {
   await this.doc.constructor.calculateReaction(
-    this.doc.target,
+    this.doc.targetId,
     this.doc.targetType
   );
 });
